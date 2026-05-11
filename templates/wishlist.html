@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <div>
+        {% csrf_token %}
+        <form action="" style="display: none;"></form>
+        <div><h2 class="py-5" style="text-align: center; text-decoration: underline;">Wishlist</h2></div>
+        <div class="container mt-4">
+           <div id="list-container">
+           </div>
+        </div>
+    </div>
+    {% load static %}
+     <script>
+          const addToCartURL="{% url 'cart' %}"
+         function loadwishlist(){
+  console.log("cart running");
+    let container=document.getElementById("list-container");
+    if(!container)return;
+    let wishlist=JSON.parse(localStorage.getItem("wishlist"))||{};
+    wishlist=wishlist.filter(item => item!==null);
+    console.log("wishlist",wishlist);
+   let wishlistIds=Object.keys(wishlist);
+   if(wishlistIds.length === 0){
+             container.innerHTML="<h3>cart is empty</h3>";
+             return;
+         }
+    fetch("/get-wishlist-products/",{
+         method:"POST",
+         headers:{
+            "Content-type":"application/json",
+            "X-CSRFToken":getCSRFToken()
+         },
+         body:JSON.stringify({
+            wishlist:wishlist
+        })
+    })
+    .then(Response => Response.json())
+    .then(data =>{
+        console.log("response",data);
+         console.log("container",container)
+         let products=data.products
+         container.innerHTML="";
+         console.log("full data",data);
+         console.log("wihlist",wishlist);
+         renderWishlist(products,wishlist)
+    });
+} 
+function renderWishlist(products,wishlist){
+    console.log("renser wishlist running")
+        let container=document.getElementById("list-container");
+        container.innerHTML="";
+        let total=0;
+        console.log("befre for each")
+         products.forEach(product=>  {
+                console.log("product",product);
+               container.innerHTML +=`
+               <div class="mb-3 p-2">
+                 <div class="row-align-items-center d-flex justify-content-between" >
+                    <div class="col-md-2">
+                       <img src="${product.image}" class="img-fluid" width="200">    
+                    </div>
+                    <div class="col-md-3 mt-5">
+                       <h3>${product.name}</h3>
+                       <p class=""><span id="price-${product.id}">${product.price}</span> rupees</p>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-center">
+                        <button onclick="addToCart(${product.id})" class="btn btn-primary cart">Add to cart</button>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-center">
+                       <button class="btn btn-danger btn-sm" onclick="removeFromCart(${product.id})">Remove</button>
+                    </div>
+                  </div>
+                </div>
+                <hr>
+               `;
+            });
+}
+
+
+    function getCSRFToken(){
+         return document.querySelector(
+            '[name=csrfmiddlewaretoken]'
+        ).value;
+    }
+    window.removeFromCart = function(id){
+        let wishlist = JSON.parse(localStorage.getItem("wishlist"))||{};
+        console.log("before",wishlist);
+        wishlist=wishlist.filter(item => item!==id);
+        wishlist=wishlist.filter(item =>Number(item.id)!==Number(id));
+        console.log("removing",id);
+         console.log("after",wishlist);
+        localStorage.setItem("wishlist",JSON.stringify(wishlist));
+        location.reload();
+       
+    }
+    window.onload=loadwishlist; 
+     </script>
+     <script src={% static "js/app.js" %}></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Packaged foods{% endblock title %}
+{% load static %}
+{% block body %}
+
+
+<div>
+    <div><h2 class="text-center py-3 fw-bold text-decoration-underline">Packaged Foods</h2></div>
+    <div>
+      
+      <div class="container ">
+        <div class="row" style="display: grid;grid-template-columns: repeat(3,1fr); gap: 20px; width: 100%; ">
+          {% for product in products %}
+          <div class="product" style="padding: 10px;text-align: center ;"> 
+          <div class="">
+            <div style="text-align: center;">
+              <div><a href=""><img class="shadow" src="{{product.image.url}}" alt="" style="height: 200px; width: 300px; "></div></a>
+              <div style="" class="py-3">
+                <span style=" font-weight: bold; margin-bottom: 0; " >{{product.name}}</span><br>
+                <span>{{product.price}} Rupees</span><br>
+                <span ><button class="wishlist btn btn-danger-fill shadow" onClick="addToWishlist({{product.id}})" style="margin-right: 10px;"> <i class="bi bi-heart"></i></button>
+                  <a href="{% url 'cart' %}">
+                    <button onClick="addToCart({{product.id}})" data-id="{{product.id}}" data-name="{{product.name}}" data-price="{{product.price}}" type="button" class=" cart btn btn-primary mt-2">Add to cart</button>
+                 </a>
+                   </span>
+              </div>
+            </div>
+          </div>
+         </div> 
+          {% endfor %}
+          <p id="p"></p>
+       </div>
+     </div>
+      
+   </div>
+
+
+</div> 
+
+
+
+<script>
+  const addToCartURL="{% url 'cart' %}"
+  
+</script>
+<script src= {% static "js/app.js" %}>
+
+</script>
+{% endblock body %}

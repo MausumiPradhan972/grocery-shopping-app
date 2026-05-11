@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}category{% endblock title %}
+{% block body %} 
+<div>
+    <div class="py-3">
+        <h2 class="text-center text-decoration-underline fw-bold">Categories</h2>
+    
+    </div>
+    <div>
+<div class="container text-center py-5">
+  <div class="row align-items-start">
+    <div class="col">
+      <div>
+        <div>
+          <a href="{% url 'packaged' %}"><img class="img-fluid shadow" src="https://tse1.mm.bing.net/th/id/OIP.DIhfZeHWpapQxoVO_2tYnwHaE8?pid=Api&P=0&h=180" alt="" style="height: 200px; width: 250px;"></a>
+        </div>
+        <div><span class="fw-bold mt-3">Packaged foods</span></div>
+      </div>
+    </div>
+    <div class="col">
+       <div>
+        <div>
+          <a href="{% url 'fruit' %}"><img class="img-fluid shadow" src="https://tse3.mm.bing.net/th/id/OIP.Dq4SjBjz2b9H9ow82I7e0wHaE8?pid=Api&P=0&h=180" alt="" style="height: 200px; width: 250px;"></div></a>
+        <div><span class="fw-bold">Fruit and vegetables</span></div>
+      </div>
+    </div>
+    <div class="col">
+       <div>
+        <div><a href="{% url 'cooking' %}"><img class="img-fluid shadow" src="https://5.imimg.com/data5/SELLER/Default/2023/7/328347751/HD/SV/LI/193447980/aashirvaad-superior-mp-atta-500x500.png" alt="" style="height: 200px; width: 250px;"></div></a>
+        <div><span class="fw-bold">Cooking Essentials</span></div>
+      </div>
+    </div>
+     <div class="col">
+       <div>
+        <div><a href="{% url 'dairy' %}"><img class="img-fluid shadow" src="https://img.freepik.com/premium-photo/dairy-products-eggs-isolated-white-background_978921-6301.jpg?w=2000" alt="" style="height: 200px; width: 250px;"></div></a>
+        <div><span class="fw-bold">Dairy and Bakery</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+</div>
+
+{% endblock body %}

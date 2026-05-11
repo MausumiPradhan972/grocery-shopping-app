@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <form action="" style="display: none;">{% csrf_token %}</form>
+    
+    <h2>cart items</h2>
+    <div class="container mt-4">
+       <div id="cart-container">
+       </div>
+    </div>
+    <h3>Total : <span id="total-price">0</span> Rupees</h3>
+    <button id="checkout" class="btn btn-primary" onclick="checkOut()">place order</button>
+       
+            
+    
+    {% load static %}
+    <script>
+  const addToCartURL="{% url 'cart' %}"
+  function loadCart(){    
+    let cart=JSON.parse(localStorage.getItem("cart"))||[];
+    cart=cart.filter(item => item!==null);
+    localStorage.setItem("cart",JSON.stringify(cart));
+    console.log("cart",cart);
+   let cartIds=Object.keys(cart);
+   if(cartIds.length === 0){
+            console.log("empty");
+             container.innerHTML="<h3>cart is empty</h3>";
+             updateTotal();
+             return;
+         }
+    fetch("/get-cart-products/",{
+         method:"POST",
+         headers:{
+            "Content-type":"application/json",
+            "X-CSRFToken":getCSRFToken()
+         },
+         body:JSON.stringify({
+            cart:cart
+        })
+    })
+    .then(Response => Response.json())
+    .then(data =>{
+        console.log("response",data);
+        let products=data.products;
+        console.log("produvts",products);
+        console.log("cart",cart)
+        renderCart(products,cart);
+    });
+    
+} 
+
+    function getCSRFToken(){
+        return document.querySelector(
+            '[name=csrfmiddlewaretoken]'
+        ).value;
+    }
+    window.onload=loadCart; 
+    function renderCart(products,cart){
+        console.log("renser cart running")
+        let container=document.getElementById("cart-container");
+        container.innerHTML="";
+        let total=0;
+        console.log("befre for each")
+        products.forEach(product=>  {
+            let cartItem=cart.find(
+                item=>Number(item.id)===Number(product.id)
+           )
+        console.log(cartItem);
+                let qty = cartItem?cartItem.quantity:0;
+                console.log("product",product);
+                if(qty>0){
+                    let itemTotal=product.price*qty;
+                    total+=itemTotal;
+               container.innerHTML +=`
+               <div class="mb-3 p-2">
+                 <div class="row-align-items-center d-flex justify-content-between" >
+                    <div class="col-md-2">
+                       <img src="${product.image}" class="img-fluid" width="200">    
+                    </div>
+                    <div class="col-md-3 mt-5">
+                       <h3>${product.name}</h3>
+                       <p class=""><span id="price-${product.id}">${product.price * qty }</span> rupees</p>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center ml-5">
+                       <button class="btn btn-outline-secondar btn-sm" onclick="decreaseQty(${product.id},${product.price})">-</button>
+                       <span id="qty-${product.id}" class="mx-2">${qty}</span>
+                       <button class="btn btn-outline-secondar btn-sm" onclick="increaseQty(${product.id},${product.price})">+</button>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-center">
+                       <button class="btn btn-danger btn-sm" onclick="removeFromCart(${product.id})">Remove</button>
+                       
+                    </div>
+                  </div>
+                </div>
+                <hr>
+               `;
+            }
+            });
+            document.getElementById("total-price").innerText=total;
+    }
+   
+    window.increaseQty=function(id,price){
+        let cart = JSON.parse(localStorage.getItem("cart"))||{};
+        cart[id]+=1;
+        localStorage.setItem("cart",JSON.stringify(cart));
+        let qty=cart[id];
+        let qtyEl = document.getElementById(`qty-${id}`);
+        let priceEl=document.getElementById(`price-${id}`);
+        qtyEl.innerText=qty;
+        priceEl.innerText=qty*price;
+        // location.reload();
+        updateTotal();
+    }
+     window.decreaseQty=function(id,price){
+        let cart = JSON.parse(localStorage.getItem("cart"))||{};
+        if (cart[id]>1){
+            cart[id]-=1;
+        }
+        localStorage.setItem("cart",JSON.stringify(cart));
+        let qty=cart[id];
+        let qtyEl = document.getElementById(`qty-${id}`);
+        let priceEl=document.getElementById(`price-${id}`);
+           qtyEl.innerText=qty;
+           priceEl.innerText=qty*price;
+        // }
+        updateTotal();
+    }
+    window.removeFromCart = function(id){
+        let cart = JSON.parse(localStorage.getItem("cart"))||[];
+        console.log("before",cart);
+        cart=cart.filter(item=>item!=null);
+        cart=cart.filter(item =>Number(item.id)!==Number(id));
+        localStorage.setItem("cart",JSON.stringify(cart));
+        console.log("updated cart",cart);
+        updateTotal();
+        loadCart();
+        location.reload();
+    }
+    function updateTotal(){
+        let total=0;
+        document.querySelectorAll("[id^='price-']").forEach(el =>{
+            total+=parseInt(el.innerText);
+        });
+        let totalEl=document.getElementById("total-price");
+        if(totalEl){
+            totalEl.innerText=total;
+        }
+    }
+     window.checkOut=function(){
+        console.log("checkout clicked");
+        let cart=JSON.parse(localStorage.getItem("cart"))||{};
+        let btn=document.getElementById("checkout")
+        cart=cart.filter(item => item!==null);
+        console.log("sending cart",cart);
+        if(cart.length===0){
+            console.log(cart.length)
+            alert("cart is empty");
+            btn.disabled=true;
+            return;
+        }else{
+            btn.disabled=false;
+        }
+        fetch("/create-order/",{
+            method:"POST",
+             headers:{
+            "Content-type":"application/json",
+            "X-CSRFToken":"{{csrf_token}}"
+         },
+         body:JSON.stringify({cart:cart})
+        })
+        .then(Response =>{
+            console.log("response data;",Response.status);
+            alert("order placed successfully");
+            localStorage.removeItem("cart");
+            window.location.reload();
+        })
+        .catch(error =>{
+              console.log("error",error);
+        })
+     }
+</script>
+    <script src="{% static 'js/app.js' %}">
+    </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
