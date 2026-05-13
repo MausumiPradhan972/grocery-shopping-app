@@ -65,7 +65,7 @@ def cart(request):
     print("view hit")
     products=Product.objects.all()
     cart=request.session.get('cart',[])
-    request.session.get['cart']=cart
+    request.session['cart']=cart
     return render(request,"cart.html",{'products':products})
 
 def signout(request):
