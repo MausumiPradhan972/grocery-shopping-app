@@ -102,7 +102,34 @@ function renderWishlist(products,wishlist){
        
     }
     window.onload=loadwishlist; 
+    console.log("js loaded")
+  window.addToCart=function(id){
+    console.log("clicked",id);
+    if(!id){
+        console.error("invalid id",id);
+        return;
+    }
+    let cart=JSON.parse(localStorage.getItem('cart'))||[];
+    cart=cart.filter(item=>item!=null);
+    let existingItem=cart.find(item=>item.id===id);
+    if(existingItem){
+        alert("already in cart");
+    }else{
+        cart.push({
+            id:Number(id),
+            quantity:1
+        });
+    }
+     console.log(JSON.parse(localStorage.getItem('cart')))
+    console.log("adding",id);
+    localStorage.setItem("cart",JSON.stringify(cart));
+    console.log("hiii")
+   
+    console.log("cart : ",cart)
+     console.log("added");
+    
+  }
      </script>
-     <script src={% static "js/app.js" %}></script>
+     <script ></script>
 </body>
 </html>
